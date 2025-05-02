@@ -87,5 +87,6 @@ If you prefer not to manage your own cluster, many cloud providers offer fully m
 These services handle upgrades, scaling, and infrastructure maintenance for you.
 
 ---
+In its most basic form, scheduling is a sub-category of container orchestration and describes the process of automatically choosing the right (worker) node to run a containerized workload on. In the past, scheduling was more of a manual task where a system administrator would choose the right server for an application by keeping track of the available servers, their capacity and other properties like where they are located.
 
-Let me know if you’d like a diagram or visual aid to complement this explanation.
+In a Kubernetes cluster, the kube-scheduler is the component that makes the scheduling decision, but is not responsible for actually starting the workload. The scheduling process in Kubernetes always starts when a new Pod object is created. Remember that Kubernetes is using a declarative approach, where the Pod is only described first, then the scheduler selects a node where the Pod actually will get started by the kubelet and the container runtime.
