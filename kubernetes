@@ -115,3 +115,42 @@ Pod Security Admission
 A beta feature to restrict pod behavior in an easy-to-implement and easy-to-understand manner, applied at the namespace level when a pod is created. These will leverage three profiles: Privileged, Baseline, and Restricted policies.
 Network Policies
 The ability to have an inside-the-cluster firewall. Ingress and Egress traffic can be limited according to namespaces and labels as well as typical network traffic characteristics.
+
+Worker Nodes
+All worker nodes run the kubelet and kube-proxy, as well as the container engine, such as containerd or cri-o. Other management daemons are deployed to watch these agents or provide services not yet included with Kubernetes.
+
+The kubelet interacts with the underlying container runtime also installed on all the nodes, and makes sure that the containers that need to run are actually running. The kubelet is the heavy lifter for changes and configuration on worker nodes ( a PodSpec is a JSON or YAML file that describes a pod). It will work to configure the local node until the specification has been met.
+
+Should a Pod require access to storage, Secrets or ConfigMaps, the kubelet will ensure access or creation. It also sends back status to the kube-apiserver for eventual persistence.
+
+The kube-proxy is in charge of managing the network connectivity to the containers. It does so through the use of iptables entries. It also has the userspace mode, in which it monitors Services and Endpoints using a random high-number port to proxy traffic. Use of ipvs can be enabled, with the expectation it will become the default, replacing iptables.
+
+Kubernetes does not have cluster-wide logging yet. Instead, another CNCF project is used, called Fluentd. When implemented, it provides a unified logging layer for the cluster, which filters, buffers, and routes messages.
+
+Cluster-wide metrics is not quite fully mature, so Prometheus is also often deployed to gather metrics from nodes and perhaps some applications.
+
+Control Plane Node
+The Kubernetes master runs various server and manager processes for the cluster. Among the components of the master node are the kube-apiserver, the kube-scheduler, and the etcd database. As the software has matured, new components have been created to handle dedicated needs, such as the cloud-controller-manager; it handles tasks once handled by the kube-controller-manager to interact with other tools, such as Rancher or DigitalOcean for third-party cluster management and reporting.
+
+There are several add-ons which have become essential to a typical production cluster, such as DNS services. Others are third-party solutions where Kubernetes has not yet developed a local component, such as cluster-level logging and resource monitoring.
+
+Services
+With every object and agent decoupled we need a flexible and scalable operator which connects resources together and will reconnect, should something die and a replacement is spawned. Each Service is a microservice handling a particular bit of traffic, such as a single NodePort or a LoadBalancer to distribute inbound requests among many Pods.
+
+A Service also handles access policies for inbound requests, useful for resource control, as well as for security.
+
+
+Operators
+An important concept for orchestration is the use of operators. These are also known as watch-loops and controllers. They query the current state, compare it against the spec, and execute code based on how they differ. Various operators ship with Kubernetes, and you can create your own, as well. A simplified view of an operator is an agent, or Informer, and a downstream store.
+
+
+A Pod is a group of co-located containers that share the same IP address. From a networking perspective, a Pod can be seen as a virtual machine of physical hosts. The network needs to assign IP addresses to Pods, and needs to provide traffic routes between all Pods on any nodes.
+
+The three main networking challenges to solve in a container orchestration system are:
+
+Coupled container-to-container communications (solved by the Pod concept)
+Pod-to-Pod communications
+External-to-Pod communications.
+Kubernetes expects the network configuration to enable Pod-to-Pod communications to be available; it will not do it for you.
+
+Pods are assigned an IP address prior to application containers being started. The service object is used to connect Pods within the network using ClusterIP addresses, from outside of the cluster using NodePort addresses, and using a load balancer if configured with a LoadBalancer service.
